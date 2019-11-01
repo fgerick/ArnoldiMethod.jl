@@ -1,5 +1,13 @@
 using LinearAlgebra
 
+small(::Type{T}) where T <: Union{BigFloat, Float64} = Float64
+small(::Type{Complex{T}}) where T <: Union{BigFloat, Float64} = ComplexF64
+small(x::T) where T <: Union{BigFloat, Float64} = Float64(x)
+small(x::Complex{T}) where T <: Union{BigFloat, Float64} = ComplexF64(x)
+
+import Random.randn
+randn(::Type{T},dims::Integer...) where T <: Union{BigFloat,Complex{BigFloat}} = T.(randn(small(T),dims...))
+
 """
     normal_hessenberg_matrix(Float64, vals::AbstractVector)
 
@@ -9,7 +17,7 @@ function normal_hessenberg_matrix(T::Type{<:Number}, vals::AbstractVector)
     n = length(vals)
     Q, R = qr(randn(T, n, n))
     A = Q * Diagonal(vals) * Q'
-    return triu(hessenberg!(A).factors, -1)
+    return triu(hessenberg!(small.(A)).factors, -1)
 end
 
 function normal_hessenberg_matrix(T::Type{<:Real}, vals::AbstractVector{<:Complex})
@@ -29,7 +37,7 @@ function normal_hessenberg_matrix(T::Type{<:Real}, vals::AbstractVector{<:Comple
             i += 1
         end
     end
-    return triu(hessenberg!(Q * D * Q').factors, -1)
+    return triu(hessenberg!(small.(Q * D * Q')).factors, -1)
 end
 
 """

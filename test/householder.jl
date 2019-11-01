@@ -3,7 +3,7 @@ using ArnoldiMethod: reflector!, restore_arnoldi!, Reflector, Arnoldi, reinitial
 using LinearAlgebra
 using Random
 
-@testset "Reflector $T" for T in (Float64, ComplexF64)
+@testset "Reflector $T" for T in (Float64, ComplexF64, BigFloat, Complex{BigFloat})
     n = 20
     x = rand(T, n)
     z = copy(x)
@@ -13,23 +13,23 @@ using Random
 
     @inferred reflector!(copy(x), n)
     @test norm(y[1:n-1]) ≤ 10eps()
-    @test abs(real(y[n])) ≈ norm(x) 
+    @test abs(real(y[n])) ≈ norm(x)
     @test abs(imag(y[n])) ≤ eps()
     @test 1 ≤ real(τ) ≤ 2
     @test abs(τ - 1) ≤ 1
 end
 
-@testset "Trivial reflector $T" for T in (Float64, ComplexF64)
+@testset "Trivial reflector $T" for T in (Float64, ComplexF64, BigFloat, Complex{BigFloat})
     x = [T(0), T(0), T(5)]
     z = copy(x)
     τ = reflector!(z, 3)
     @test iszero(τ)
 end
 
-@testset "rmul! $T" for T in (Float64, ComplexF64)
+@testset "rmul! $T" for T in (Float64, ComplexF64, BigFloat, Complex{BigFloat})
     A = rand(T, 4, 4)
     B = copy(A)
-    
+
     # Implicit representation
     G = Reflector{T}(4)
     rand!(G.vec)
@@ -45,10 +45,10 @@ end
     @test A ≈ B * H'
 end
 
-@testset "lmul! $T" for T in (Float64, ComplexF64)
+@testset "lmul! $T" for T in (Float64, ComplexF64, BigFloat, Complex{BigFloat})
     A = rand(T, 4, 4)
     B = copy(A)
-    
+
     # Implicit representation
     G = Reflector{T}(4)
     rand!(G.vec)
@@ -64,7 +64,7 @@ end
     @test A ≈ H * B
 end
 
-@testset "Restore Hessenberg matrix $T" for T in (Float64, ComplexF64)
+@testset "Restore Hessenberg matrix $T" for T in (Float64, ComplexF64, BigFloat, Complex{BigFloat})
     n, k = 10, 6
     Q = qr(randn(T, k, k)).Q * Matrix(1.0I, k, k)
 

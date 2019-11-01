@@ -6,7 +6,7 @@ using ArnoldiMethod: Hessenberg, Rotation2, Rotation3
 
 @testset "Givens rotation" begin
     @testset "Single rotation" begin
-        @testset "lmul!" for T in (Float64, ComplexF64)
+        @testset "lmul!" for T in (Float64, ComplexF64, BigFloat, Complex{BigFloat})
             A = rand(T, 6, 5)
 
             G = Rotation2(rand(real(T)), rand(T), 2)
@@ -28,7 +28,7 @@ using ArnoldiMethod: Hessenberg, Rotation2, Rotation3
     end
 
     @testset "Double rotation" begin
-        @testset "lmul!" for T in (Float64, ComplexF64)
+        @testset "lmul!" for T in (Float64, ComplexF64, BigFloat, Complex{BigFloat})
             A = rand(T, 6, 5)
 
             G = Rotation3(rand(real(T)), rand(T), rand(real(T)), rand(T), 2)

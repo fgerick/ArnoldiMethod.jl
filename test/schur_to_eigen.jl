@@ -3,9 +3,9 @@ using LinearAlgebra, SparseArrays
 using ArnoldiMethod: partialschur, partialeigen
 using Random
 
-@testset "Schur to eigen $T take $i" for T in (Float64,ComplexF64), i in 1:10
+@testset "Schur to eigen $T take $i" for T in (Float64,ComplexF64, BigFloat, Complex{BigFloat}), i in 1:10
     Random.seed!(i)
-    A = spdiagm(0 => 1:100) + sprand(100, 100, 0.01)
+    A = spdiagm(0 => 1:100) + sprand(T,100, 100, 0.01)
     ε = 1e-7
     minim, maxim = 10, 20
 

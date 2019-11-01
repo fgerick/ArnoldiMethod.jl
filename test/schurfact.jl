@@ -7,54 +7,54 @@ using ArnoldiMethod: eigenvalues, local_schurfact!, is_offdiagonal_small,
 
 include("utils.jl")
 
-@testset "Schur factorization" begin
+@testset "Schur factorization $T" for T in (Float64, BigFloat)
     let
         # 2-by-2 matrix with distinct eigenvalues while H[2,1] != 0
-        H = [1.0 2.0; 3.0 4.0]
+        H = T[1.0 2.0; 3.0 4.0]
         H′ = copy(H)
-        Q = Matrix{Float64}(I, 2, 2)
-        
+        Q = Matrix{T}(I, 2, 2)
+
         @test local_schurfact!(H′, 1, 2, Q, eps(), 2)
         @test norm(H * Q - Q * H′) < 10eps()
-        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(H′), by=realimag)
-        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(H), by=realimag)
+        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(ComplexF64.(H′)), by=realimag)
+        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(ComplexF64.(H)), by=realimag)
         @test iszero(H′[2,1])
     end
 
     let
         # 2-by-2 matrix with distinct eigenvalues while H[2,1] = 0
-        H = [1.0 2.0; 0.0 4.0]
+        H = T[1.0 2.0; 0.0 4.0]
         H′ = copy(H)
-        Q = Matrix{Float64}(I, 2, 2)
-        
+        Q = Matrix{T}(I, 2, 2)
+
         @test local_schurfact!(H′, 1, 2, Q, eps(), 2)
         @test norm(H * Q - Q * H′) < 10eps()
-        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(H′), by=realimag)
-        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(H), by=realimag)
+        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(ComplexF64.(H′)), by=realimag)
+        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(ComplexF64.(H)), by=realimag)
         @test iszero(H′[2,1])
     end
 
     let
         # 2-by-2 matrix with conjugate eigenvalues
-        H = [1.0 4.0; -5.0 3.0]
+        H = T[1.0 4.0; -5.0 3.0]
         H′ = copy(H)
-        Q = Matrix{Float64}(I, 2, 2)
-        
+        Q = Matrix{T}(I, 2, 2)
+
         @test local_schurfact!(H′, 1, 2, Q, eps(), 2)
         @test norm(H * Q - Q * H′) < 10eps()
-        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(H′), by=realimag)
-        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(H), by=realimag)
+        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(ComplexF64.(H′)), by=realimag)
+        @test sort!(eigenvalues(H′), by=realimag) ≈ sort!(eigvals(ComplexF64.(H)), by=realimag)
     end
-    
+
     # Larger real matrix.
 
     let
         n = 10
         # Transforming a 1+i by n-i block of the matrix H into upper triangular form
         for i = 0 : 4
-            Q = Matrix{Float64}(I, n, n)
-            H = triu(randn(Float64, n, n))
-            H[1+i:n-i,1+i:n-i] = normal_hessenberg_matrix(Float64, i+1:n-i)
+            Q = Matrix{T}(I, n, n)
+            H = triu(convert.(T, randn(n, n)))
+            H[1+i:n-i,1+i:n-i] = normal_hessenberg_matrix(T, i+1:n-i)
             H′ = copy(H)
 
             # Test that the procedure has converged
@@ -73,9 +73,9 @@ include("utils.jl")
 
             # Test that the partial Schur decomposition relation holds
             @test norm(H * Q - Q * H′) < 1000eps()
-            
+
             # Test that the eigenvalues of H are the same before and after transformation
-            @test sort!(eigvals(H), by=realimag) ≈ sort!(eigvals(H′), by=realimag)
+            @test sort!(eigvals(ComplexF64.(H)), by=realimag) ≈ sort!(eigvals(ComplexF64.(H′)), by=realimag)
         end
 
     end
@@ -87,15 +87,15 @@ include("utils.jl")
         n = 10
         # Transforming a 1+i by 10-i block of the matrix H into upper triangular form
         for i = 0 : 4
-            Q = Matrix{ComplexF64}(I, n, n)
-            H = triu(randn(ComplexF64, n, n))
-            H[i+1:n-i,i+1:n-i] = normal_hessenberg_matrix(ComplexF64, (i+1:n-i) .* (1 + im))
+            Q = Matrix{Complex{T}}(I, n, n)
+            H = triu(convert.(Complex{T}, randn(ComplexF64, n, n)))
+            H[i+1:n-i,i+1:n-i] = normal_hessenberg_matrix(Complex{T}, (i+1:n-i) .* (1 + im))
             H′ = copy(H)
 
             # Test that the procedure has converged
             @test local_schurfact!(H′, 1+i, n-i, Q)
 
-            # Test if subdiagonal is small. 
+            # Test if subdiagonal is small.
             for j = 1+i:n-i-1
                 @test iszero(H′[j+1,j])
             end
@@ -105,9 +105,9 @@ include("utils.jl")
 
             # Test that the partial Schur decomposition relation holds
             @test norm(H * Q - Q * H′) < 1000eps()
-            
+
             # Test that the eigenvalues of H are the same before and after transformation
-            @test sort!(eigvals(H), by=realimag) ≈ sort!(eigvals(H′), by=realimag)
+            @test sort!(eigvals(ComplexF64.(H)), by=realimag) ≈ sort!(eigvals(ComplexF64.(H′)), by=realimag)
         end
     end
 end

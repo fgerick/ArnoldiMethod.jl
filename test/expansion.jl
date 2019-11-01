@@ -3,18 +3,19 @@
 using Test, LinearAlgebra, SparseArrays
 using ArnoldiMethod: reinitialize!, Arnoldi, iterate_arnoldi!
 
-@testset "Initialization" begin
-    arnoldi = Arnoldi{Float64}(5, 3)
+@testset "Initialization $T" for T in (Float64,BigFloat)
+    arnoldi = Arnoldi{T}(5, 3)
     reinitialize!(arnoldi)
     @test norm(arnoldi.V[:, 1]) ≈ 1
 end
 
-@testset "Arnoldi Factorization" begin
+
+@testset "Arnoldi Factorization $T" for T in (Float64,BigFloat)
     n = 10
     max = 6
-    A = sprand(n, n, .1) + I
+    A = sprand(T, n, n, .1) + I
 
-    arnoldi = Arnoldi{Float64}(n, max)
+    arnoldi = Arnoldi{T}(n, max)
     reinitialize!(arnoldi)
     V, H = arnoldi.V, arnoldi.H
 
@@ -29,16 +30,16 @@ end
     @test norm(V' * V - I) < 1e-10
 end
 
-@testset "Invariant subspace" begin
+@testset "Invariant subspace $T" for T in (Float64,BigFloat)
     # Generate a block-diagonal matrix A
-    A = [rand(4,4)  zeros(4,4); 
-         zeros(4,4) rand(4,4)]
+    A = [rand(T,4,4)  zeros(T,4,4);
+         zeros(T,4,4) rand(T,4,4)]
 
     # and an initial vector [1; 0; ... 0]
-    vh = Arnoldi{Float64}(8, 5)
+    vh = Arnoldi{T}(8, 5)
     V, H = vh.V, vh.H
-    V[:,1] .= 0.0
-    V[1,1] = 1.0
+    V[:,1] .= zero(T)
+    V[1,1] = one(T)
 
     # Then {v, Av, A²v, A³v}
     # is an invariant subspace
