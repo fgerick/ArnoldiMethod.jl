@@ -9,12 +9,16 @@ Generate a random `j+1`th column orthonormal against V[:,1:j]
 Returns true if the column is a valid new basis vector.
 Returns false if the column is numerically in the span of the previous vectors.
 """
-function reinitialize!(arnoldi::Arnoldi{T}, j::Int = 0) where {T}
+function reinitialize!(arnoldi::Arnoldi{T}, j::Int = 0, u0=[]) where {T}
     V = arnoldi.V
     v = view(V, :, j+1)
 
     # Generate a new random column
-    rand!(v)
+    if isempty(u0)
+        rand!(v)
+    else
+        v .= u0
+    end
 
     # Norm before orthogonalization
     rnorm = norm(v)
