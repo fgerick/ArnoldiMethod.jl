@@ -98,13 +98,13 @@ function partialschur(A;
                        mindim::Int = min(max(10, nev), size(A, 1)),
                        maxdim::Int = min(max(20, 2nev), size(A, 1)),
                        restarts::Int = 200,
-                       u0 = [])
+                       v0 = [])
     s = checksquare(A)
     if nev < 1
         throw(ArgumentError("nev cannot be less than 1"))
     end
     nev ≤ mindim ≤ maxdim ≤ s || throw(ArgumentError("nev ≤ mindim ≤ maxdim does not hold, got $nev ≤ $mindim ≤ $maxdim"))
-    _partialschur(A, vtype(A), mindim, maxdim, nev, tol, restarts, which, u0)
+    _partialschur(A, vtype(A), mindim, maxdim, nev, tol, restarts, which, v0)
 end
 
 """
@@ -140,7 +140,7 @@ struct History
     nev::Int
 end
 
-function _partialschur(A, ::Type{T}, mindim::Int, maxdim::Int, nev::Int, tol::Ttol, restarts::Int, which::Target, u0=[]) where {T,Ttol<:Real}
+function _partialschur(A, ::Type{T}, mindim::Int, maxdim::Int, nev::Int, tol::Ttol, restarts::Int, which::Target, v0 = []) where {T,Ttol<:Real}
     n = size(A, 1)
 
     # Pre-allocated Arnoldi decomp
@@ -182,7 +182,7 @@ function _partialschur(A, ::Type{T}, mindim::Int, maxdim::Int, nev::Int, tol::Tt
     prods = mindim
 
     # Initialize an Arnoldi relation of size `mindim`
-    reinitialize!(arnoldi, 0, u0)
+    reinitialize!(arnoldi, 0, v0)
     iterate_arnoldi!(A, arnoldi, 1:mindim)
 
     for iter = 1 : restarts
